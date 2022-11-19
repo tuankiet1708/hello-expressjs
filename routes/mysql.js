@@ -1,15 +1,6 @@
 const express = require('express');
 const mysql = express.Router()
-
-const mysqlDb = require('mysql')
-const connection = mysqlDb.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'quanlynhanvien'
-})
-
-// connection.connect();
+const connection = require("../database/mysql");
 
 mysql.get('/employee/list', function (req, res) { // /mysql/employee/list
     connection.query('SELECT * FROM employee', (err, rows, fields) => {

@@ -55,6 +55,7 @@ app.post('/upload', async (req, res) => {
     }
 });
 
+app.use('/jwt', require('./routes/jwt')) // load the router on '/jwt'
 app.use('/auth', require('./routes/auth')) // load the router on '/auth'
 app.use('/greet', require('./routes/greet')) // load the router on '/greet'
 app.use('/hello', require('./routes/hello')) // load the router on '/hello'
@@ -62,9 +63,9 @@ app.use('/mysql', require('./routes/mysql')) // load the router on '/mysql'
 app.use('/search', require('./routes/search')) // load the router on '/search'
 // app.use(['/gre+t', '/hel{2}o'], greet)
 
-app.use('/', function(req, res) {
-    res.redirect('/hello');
-})
+// app.use('/', function(req, res) {
+//     res.redirect('/hello');
+// })
 
 app.listen(port, () => 
   console.log(`App is listening on port ${port}.`)
