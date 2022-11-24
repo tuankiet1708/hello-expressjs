@@ -4,8 +4,9 @@ const search = express.Router()
 
 const googleApi = require('../config/googleApi');
 const {url, cx, key} = googleApi.googleSearch;
+const {verifyToken, signToken} = require('../middlewares/jwt');
 
-search.get('/google', async (req, res) => { // /search/top quán cafe ngon ở sài gòn site:toplist.vn
+search.get('/google', verifyToken, async (req, res) => { // /search/top quán cafe ngon ở sài gòn site:toplist.vn
     // const response = axios.get(googleSearchApi);
 
     // axios.get(googleSearchApi)

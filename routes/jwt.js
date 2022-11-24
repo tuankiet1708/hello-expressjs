@@ -4,9 +4,18 @@ const connection = require("../database/mysql");
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
 const jsonWebToken = require('jsonwebtoken');
+const {verifyToken, signToken} = require('../middlewares/jwt');
+const jwtConfig = require('../config/jwt');
 
 jwt.get('/', (req, res) => {
    res.send("Hello JWT");
+})
+
+jwt.post('/verify', verifyToken, (req, res) => {
+    // xử lý 
+    res.send({
+        "data": req.user
+    })
 })
 
 jwt.post('/login', (req, res) => {
@@ -34,27 +43,10 @@ jwt.post('/login', (req, res) => {
             const isSamePassword = await bcrypt.compare(password, encryptedPassword);
 
             if (isSamePassword) {
-                 // Create token
-                const token = jsonWebToken.sign(
-                    // payload
-                    { 
-                        userId, 
-                        email
-                    }, 
-                    // secret key
-                    "%@@@zOmL$A&0dfd9g/*iiiG",  // 
-                    // timeout
-                    {
-                        audience: "reactjs",
-                        issuer: "expressjs",
-                        expiresIn: "2h", 
-                    }
-                );
-
                 res.status(200).send({
                     "error": null,
                     "data": {
-                        token
+                        token: signToken(userId, email)
                     }
                 })
             }
