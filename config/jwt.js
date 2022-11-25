@@ -1,4 +1,4 @@
-const TOKEN_KEY = '%@@@zOmL$A&0dfd9g/*iiiG';
+const TOKEN_KEY = process.env.TOKEN_KEY;
 
 module.exports = {
     TOKEN_KEY,
