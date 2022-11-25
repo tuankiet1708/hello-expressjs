@@ -5,6 +5,6 @@ module.exports = {
     jwtOption: {
         audience: "reactjs",
         issuer: "expressjs",
-        expiresIn: 60, 
+        expiresIn: process.env.TOKEN_TIMEOUT, 
     }
 }

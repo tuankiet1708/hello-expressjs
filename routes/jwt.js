@@ -1,11 +1,10 @@
 const express = require('express');
 const jwt = express.Router();
-const connection = require("../database/mysql");
 const bcrypt = require('bcrypt');
 const _ = require('lodash');
-const jsonWebToken = require('jsonwebtoken');
 const {verifyToken, signToken} = require('../middlewares/jwt');
-const jwtConfig = require('../config/jwt');
+const UsersJwt = require('../models/UsersJwt');
+const Mailer = require('../models/Mailer');
 
 jwt.get('/', (req, res) => {
    res.send("Hello JWT");
@@ -32,31 +31,28 @@ jwt.post('/login', (req, res) => {
         })  
     }
 
-    connection.query(
-        `SELECT * FROM users_jwt where email = '${email}'`,
-        async (error, result) => {
-            const {
-                password: encryptedPassword = '', 
-                user_id: userId
-            } = _.get(result, '0', {});
+    UsersJwt.getUserByEmail(email, async (error, result) => {
+        const {
+            password: encryptedPassword = '', 
+            user_id: userId
+        } = _.get(result, '0', {});
 
-            const isSamePassword = await bcrypt.compare(password, encryptedPassword);
+        const isSamePassword = await bcrypt.compare(password, encryptedPassword);
 
-            if (isSamePassword) {
-                res.status(200).send({
-                    "error": null,
-                    "data": {
-                        token: signToken(userId, email)
-                    }
-                })
-            }
-            else {
-                res.status(400).send({
-                    "error": "INVALID_ACCOUNT"
-                })
-            }
+        if (isSamePassword) {
+            res.status(200).send({
+                "error": null,
+                "data": {
+                    token: signToken(userId, email)
+                }
+            })
         }
-    )
+        else {
+            res.status(400).send({
+                "error": "INVALID_ACCOUNT"
+            })
+        }
+    })
 })
 
 jwt.post('/register', async (req, res) => {
@@ -74,27 +70,18 @@ jwt.post('/register', async (req, res) => {
         })
     }
 
-    /**
-     * table users 
-     *  - user_id
-     *  - email
-     *  - password
-     */
-
-    /** 
-     * INSERT INTO users (email, password) VALUES (<email>, <password>)
-     */
-
     const encryptedPassword = await bcrypt.hash(password, 10);
 
-    connection.query(
-        `INSERT INTO users_jwt (email, password) VALUES ( '${email}' , '${encryptedPassword}' )`,
-        (error) => {
-            res.status(error ? 400 : 200).send({
-                "error": error ? error.code : null
-            })
+    UsersJwt.createNewUser(email, encryptedPassword, (error) => {
+        if (! error) {
+            // gui mail
+            Mailer.sendEmailAfterCreatingNewUser(email);
         }
-    )
+
+        res.status(error ? 400 : 200).send({
+            "error": error ? error.code : null
+        })
+    })
 });
 
 module.exports = jwt;
